@@ -14,25 +14,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Remove ChromaDB binary files
+      - name: Remove local ChromaDB indexes
         run: |
           rm -rf chroma_db_all-MiniLM-L6-v2
           rm -rf chroma_db_gemini-embedding-001
+
+      - name: Create clean deployment history
+        run: |
+          git checkout --orphan hf-deploy
+          git add -A
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git commit -m "Deploy FlexiParse"
 
       - name: Push to Hugging Face Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-          git add -A
-
-          if ! git diff --cached --quiet; then
-            git commit -m "Prepare FlexiParse deployment"
-          fi
-
           git remote add space https://DevMukesh:${HF_TOKEN}@huggingface.co/spaces/DevMukesh/Flexiparse
-
-          git push --force space HEAD:main
+          git push --force space hf-deploy:main
