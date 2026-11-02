@@ -1,0 +1,29 @@
+
+name: Deploy FlexiParse to Hugging Face
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          git remote add space https://DevMukesh:${HF_TOKEN}@huggingface.co/spaces/DevMukesh/Flexiparse
+
+          git push --force space HEAD:main
